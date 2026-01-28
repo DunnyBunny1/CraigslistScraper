@@ -35,7 +35,7 @@ jobs:
             --gen2 \
             --runtime=python312 \
             --region=${{ env.REGION }} \
-            --source=. \
+            --source=src \
             --entry-point=check_new_bikes \
             --trigger-http \
             --allow-unauthenticated \
