@@ -1,7 +1,7 @@
 """Google Cloud Function entry point for bike alert system"""
 import functions_framework
 import logging
-from pipeline import run_pipeline
+from main import run_pipeline
 
 # Configure logging
 logging.basicConfig(
