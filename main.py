@@ -3,10 +3,6 @@ import time
 
 
 def main():
-    cookies = {
-        'cl_b': '4|13df134dda7ffb7bcea0ed2fecb1be8b8c121134|17696133391ax-M',
-    }
-
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:147.0) Gecko/20100101 Firefox/147.0',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
