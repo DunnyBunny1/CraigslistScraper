@@ -1,0 +1,16 @@
+.git
+.gitignore
+__pycache__/
+*.pyc
+*.pyo
+.env
+.env.local
+*.ipynb
+.ipynb_checkpoints/
+notebooks/
+requirements-dev.txt
+test_*.py
+*_test.py
+README.md
+.vscode/
+.idea/

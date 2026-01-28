@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 # TODO: Figure out how env var loading works from a cloud function
 
 
-def main():
+def run_pipeline():
     """Run the full bike alert pipeline"""
     log.info("Starting bike alert check...")
 
@@ -94,7 +94,3 @@ def main():
     log.info(f"\tGood bikes found: {good_bikes_found}")
     log.info(f" \tHigh-confidence matches: {high_confidence_matches}")
     log.info(f"{'=' * 60}")
-
-
-if __name__ == "__main__":
-    main()

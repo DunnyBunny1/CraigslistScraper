@@ -15,7 +15,7 @@ class Config(BaseSettings):
     search_lat: float = 37.789
     search_lon: float = -122.394
     search_distance_miles: int = 15
-    search_path : str = "san-francisco-ca/bia"  # filters for bikes in the SF bay area
+    search_path: str = "san-francisco-ca/bia"  # filters for bikes in the SF bay area
 
     # TODO: Look into remote config to allow for backfills on unsuccessful runs
     check_interval_minutes: int = (
@@ -26,15 +26,13 @@ class Config(BaseSettings):
     anthropic_api_key: str
     # llm_models: List[str] = ["claude-haiku-4-5", "claude-sonnet-4-5"]
 
-    # TODO: Add SMS twilio config
+    # twilio config
     twilio_account_sid: str
     twilio_auth_token: str
-    twilio_messaging_service_sid: (
-        str  # service identifier for our twilio SMS messaging service
-    )
+    # service identifier for our twilio SMS messaging service
+    twilio_messaging_service_sid: str
     twilio_to_number: str  # phone number we are sending the twilio message ot
 
-    # if environment variables are not set in the environment, tells pydantic to load the key-vals of this config class from the `.env` file in this file's directory
     model_config = SettingsConfigDict(
         env_file=Path(__file__).parent / ".env", env_file_encoding="utf-8"
     )
