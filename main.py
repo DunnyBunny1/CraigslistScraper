@@ -3,7 +3,7 @@ import logging
 import time
 from change_data_capture import get_new_listing_urls
 from scraper import fetch_and_parse_listing
-from llm_classifier import BikeClassifier
+from llm_classifier import BikeClassifier, BikeClassification
 from config import Config
 
 logging.basicConfig(
@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 
 def main():
     """Run the full bike alert pipeline"""
-    log.info("🔍 Starting bike alert check...")
+    log.info("Starting bike alert check...")
 
     # load our config
     config: Config = Config()
@@ -30,7 +30,7 @@ def main():
         return
 
     if not new_urls:
-        log.info(f"No new listings found in the past {config.check_interval_minutes} minutes ")
+        log.info(f"No new listings found in the past {config.check_interval_minutes} minutes")
         return
 
     log.info(f"Found {len(new_urls)} new listings to check")
@@ -39,6 +39,7 @@ def main():
     classifier = BikeClassifier(api_key=config.anthropic_api_key)
 
     good_bikes_found = 0
+    high_confidence_matches = 0
 
     # 3. Process each listing
     for i, url in enumerate(new_urls, 1):
@@ -56,23 +57,37 @@ def main():
 
         # Classify
         try:
-            is_good, reason = classifier.classify(listing)
+            classification: BikeClassification = classifier.classify(listing)
 
-            if is_good:
-                log.info(f"GOOD BIKE FOUND! Reason: {reason}")
+            if classification.is_good:
+                log.info(f"GOOD BIKE FOUND!")
+                log.info(f"\tReason: {classification.reason}")
+                log.info(f"\tConfidence: {classification.confidence}")
+                log.info(f"\tURL: {url}")
+
                 good_bikes_found += 1
 
-                # TODO: Send SMS alert
+                if classification.confidence == "high":
+                    high_confidence_matches += 1
+                    # TODO: Send SMS alert for high-confidence matches
+                    # send_sms_alert(listing, classification)
+
             else:
-                log.info(f"Rejected: {reason}")
+                log.info(f"Rejected ({classification.confidence}): {classification.reason}")
 
         except Exception as e:
-            log.error(f"Failed to classify: {e}")
+            log.error(f"Failed to classify: {e}", exc_info=True)
 
         # Rate limiting - be nice to Craigslist
         time.sleep(2)
 
-    log.info(f"\nCheck complete! Found {good_bikes_found} good bikes out of {len(new_urls)} new listings")
+    # Summary
+    log.info(f"\n{'=' * 60}")
+    log.info(f"Check complete!")
+    log.info(f"\tTotal new listings: {len(new_urls)}")
+    log.info(f"\tGood bikes found: {good_bikes_found}")
+    log.info(f" \tHigh-confidence matches: {high_confidence_matches}")
+    log.info(f"{'=' * 60}")
 
 
 if __name__ == "__main__":
