@@ -1,7 +1,9 @@
 import logging
+
 from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import SystemMessage, HumanMessage
 from pydantic import BaseModel, Field
+
 from models import BikeListingData
 
 log = logging.getLogger(__name__)
@@ -31,7 +33,9 @@ class BikeClassifier:
             api_key=api_key,
             model=model,
             temperature=0.0,  # Deterministic for consistent classifications
-        ).with_structured_output(BikeClassification)
+        ).with_structured_output(
+            BikeClassification
+        )  # attach our structured output for pydantic validation on the LLM response
 
         self.system_prompt = """You are a bike expert who identifies quality MODERN road bikes on Craigslist.
 
@@ -43,8 +47,6 @@ GOOD BIKES MUST HAVE ALL:
 - Components: MODERN Shimano 105+ (10/11-speed Ultegra/Dura-Ace) OR SRAM Rival/Force/Red
 - Brand: Quality (Cannondale, Trek, Specialized, Giant, Cervelo, Bianchi, etc.)
 - Frame: Carbon or high-quality aluminum
-- Condition: Complete, ride-ready (not broken/project/needs work)
-- Price: $800-$3000
 - Era: Modern (NOT 1970s-1990s vintage, even with period-correct quality components)
 
 AUTO-REJECT ANY OF:
@@ -120,33 +122,37 @@ Now classify the following bike:"""
         """
         # Build a structured prompt matching the example format
         user_message = f"""Title: "{listing.title}"
-Price: {listing.price or 'Not listed'}
-Bicycle Type: {listing.bicycle_type or 'Unknown'}
-Frame Size: {listing.frame_size or 'Not specified'}
-Frame Material: {listing.frame_material or 'Unknown'}
-Wheel Size: {listing.wheel_size or 'Unknown'}
-Manufacturer: {listing.manufacturer or 'Unknown'}
-Model: {listing.model or 'Unknown'}
-Condition: {listing.condition or 'Not specified'}
+Price: {listing.price or "Not listed"}
+Bicycle Type: {listing.bicycle_type or "Unknown"}
+Frame Size: {listing.frame_size or "Not specified"}
+Frame Material: {listing.frame_material or "Unknown"}
+Wheel Size: {listing.wheel_size or "Unknown"}
+Manufacturer: {listing.manufacturer or "Unknown"}
+Model: {listing.model or "Unknown"}
+Condition: {listing.condition or "Not specified"}
 Description: {listing.body[:500]}{"..." if len(listing.body) > 500 else ""}
 
 Classification:"""
 
         messages = [
             SystemMessage(content=self.system_prompt),
-            HumanMessage(content=user_message)
+            HumanMessage(content=user_message),
         ]
 
         # Call the LLM with structured output
         log.info(f"Classifying: {listing.title}")
         classification: BikeClassification = self.llm.invoke(messages)
 
-        log.info(f"Classification result: is_good={classification.is_good}, "
-                 f"confidence={classification.confidence}, reason={classification.reason}")
+        log.info(
+            f"Classification result: is_good={classification.is_good}, "
+            f"confidence={classification.confidence}, reason={classification.reason}"
+        )
 
         return classification
 
-    def classify_batch(self, listings: list[BikeListingData]) -> list[tuple[BikeListingData, BikeClassification]]:
+    def classify_batch(
+        self, listings: list[BikeListingData]
+    ) -> list[tuple[BikeListingData, BikeClassification]]:
         """
         Classify multiple listings efficiently.
 
@@ -165,7 +171,7 @@ Classification:"""
                 failed_classification = BikeClassification(
                     is_good=False,
                     reason=f"Classification failed: {str(e)}",
-                    confidence="low"
+                    confidence="low",
                 )
                 results.append((listing, failed_classification))
 

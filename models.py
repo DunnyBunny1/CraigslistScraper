@@ -1,9 +1,11 @@
-from pydantic import BaseModel, Field
 from typing import Optional
+
+from pydantic import BaseModel, Field
 
 
 class BikeListingData(BaseModel):
     """Represents data for a Craigslist bike listing"""
+
     title: str
     price: Optional[str] = Field(
         description="Price of the bike listing, optionally with the currency attached. Example: `$625`",
@@ -38,3 +40,7 @@ class BikeListingData(BaseModel):
         description="Main posting body text. This contains the whole post description"
     )
     url: str = Field(description="URL of the bike listing")
+
+    # TODO: Consider omitting any listing data not relevant to the LLM decision in order to avoid polluting context
+    # namely: price, condition, url. This information might be useful later to include in the text message, but may be
+    # irrelevant for the LLM verdict

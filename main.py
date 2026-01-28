@@ -1,19 +1,22 @@
 """Main entry point for bike alert system"""
+
 import logging
 import time
+
 from change_data_capture import get_new_listing_urls
-from scraper import fetch_and_parse_listing
-from llm_classifier import BikeClassifier, BikeClassification
 from config import Config
+from llm_classifier import BikeClassifier, BikeClassification
+from notifier import send_whatsapp_alert
+from scraper import fetch_and_parse_listing
 
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 log = logging.getLogger(__name__)
 
 
-# TODO: Figure out how env var loading works in the cloud
+# TODO: Figure out how env var loading works from a cloud function
+
 
 def main():
     """Run the full bike alert pipeline"""
@@ -22,7 +25,7 @@ def main():
     # load our config
     config: Config = Config()
 
-    # 1. Get new listings via CDC
+    # 1. Get new the URLS for any new listings since we last ran this program
     try:
         new_urls = get_new_listing_urls(n_minutes=config.check_interval_minutes)
     except Exception as e:
@@ -30,7 +33,9 @@ def main():
         return
 
     if not new_urls:
-        log.info(f"No new listings found in the past {config.check_interval_minutes} minutes")
+        log.info(
+            f"No new listings found in the past {config.check_interval_minutes} minutes"
+        )
         return
 
     log.info(f"Found {len(new_urls)} new listings to check")
@@ -55,7 +60,7 @@ def main():
         log.info(f"  Price: {listing.price}")
         log.info(f"  Type: {listing.bicycle_type}")
 
-        # Classify
+        # classify the listing using our LLM
         try:
             classification: BikeClassification = classifier.classify(listing)
 
@@ -69,16 +74,17 @@ def main():
 
                 if classification.confidence == "high":
                     high_confidence_matches += 1
-                    # TODO: Send SMS alert for high-confidence matches
-                    # send_sms_alert(listing, classification)
-
+                    # send whatsapp alerts for high-confidence matches
+                    send_whatsapp_alert(listing, classification.reason)
             else:
-                log.info(f"Rejected ({classification.confidence}): {classification.reason}")
+                log.info(
+                    f"Rejected ({classification.confidence}): {classification.reason}"
+                )
 
         except Exception as e:
             log.error(f"Failed to classify: {e}", exc_info=True)
 
-        # Rate limiting - be nice to Craigslist
+        # simple rate limiting - TODO refactor to use tenacity library for rate limmiting + retries
         time.sleep(2)
 
     # Summary
