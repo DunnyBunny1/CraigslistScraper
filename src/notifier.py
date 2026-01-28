@@ -44,7 +44,7 @@ def send_whatsapp_alert(listing: BikeListingData, reason: str) -> bool:
         # Send WhatsApp using sandbox
         message = client.messages.create(
             body=message_body,
-            from_="",  # Twilio WhatsApp sandbox
+            from_=TWILIO_WHATSAPP_SANDBOX_NUMBER,  # Twilio WhatsApp sandbox
             to=f"whatsapp:{config.twilio_to_number}",
         )
 
