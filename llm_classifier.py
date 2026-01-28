@@ -11,6 +11,7 @@ log = logging.getLogger(__name__)
 
 class BikeClassification(BaseModel):
     """Structured output for bike classification."""
+
     is_good: bool = Field(description="Whether this is a good bike deal")
     reason: str = Field(description="One-sentence explanation for the classification")
     confidence: str = Field(description="Confidence level: 'high', 'medium', or 'low'")

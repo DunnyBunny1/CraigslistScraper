@@ -8,6 +8,7 @@ from config import Config
 from llm_classifier import BikeClassifier, BikeClassification
 from notifier import send_whatsapp_alert
 from scraper import fetch_and_parse_listing
+import functions_framework
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -15,7 +16,16 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 
-# TODO: Figure out how env var loading works from a cloud function
+@functions_framework.http
+def check_new_bikes(request):
+    """Cloud Function HTTP entry point"""
+    log.info("🚀 Cloud Function triggered")
+    try:
+        run_pipeline()
+        return "Bike check completed successfully", 200
+    except Exception as e:
+        log.error(f"Pipeline failed: {e}", exc_info=True)
+        return f"Error: {str(e)}", 500
 
 
 def run_pipeline():
@@ -94,3 +104,7 @@ def run_pipeline():
     log.info(f"\tGood bikes found: {good_bikes_found}")
     log.info(f" \tHigh-confidence matches: {high_confidence_matches}")
     log.info(f"{'=' * 60}")
+
+
+if __name__ == "__main__":
+    run_pipeline()

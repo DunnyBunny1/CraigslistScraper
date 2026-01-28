@@ -18,9 +18,7 @@ class Config(BaseSettings):
     search_path: str = "san-francisco-ca/bia"  # filters for bikes in the SF bay area
 
     # TODO: Look into remote config to allow for backfills on unsuccessful runs
-    check_interval_minutes: int = (
-        15  # should match the interval of how often the cloud function that invokes this program runs
-    )
+    check_interval_minutes: int = 15  # should match the interval of how often the cloud function that invokes this program runs
 
     # LLM config
     anthropic_api_key: str
