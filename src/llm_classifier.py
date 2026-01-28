@@ -152,7 +152,7 @@ Classification:"""
         return classification
 
     def classify_batch(
-        self, listings: list[BikeListingData]
+            self, listings: list[BikeListingData]
     ) -> list[tuple[BikeListingData, BikeClassification]]:
         """
         Classify multiple listings efficiently.

@@ -32,5 +32,5 @@ class Config(BaseSettings):
     twilio_to_number: str  # phone number we are sending the twilio message ot
 
     model_config = SettingsConfigDict(
-        env_file=Path(__file__).parent / ".env", env_file_encoding="utf-8"
+        env_file=Path(__file__).parent.parent / ".env", env_file_encoding="utf-8"
     )
