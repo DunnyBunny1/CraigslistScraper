@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)
 @functions_framework.http
 def check_new_bikes(request):
     """Cloud Function HTTP entry point"""
-    log.info("🚀 Cloud Function triggered")
+    log.info("Cloud Function triggered")
     try:
         run_pipeline()
         return "Bike check completed successfully", 200
